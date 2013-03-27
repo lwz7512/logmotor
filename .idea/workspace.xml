@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="19159b06-bed5-41eb-9fd6-9145aea9679a" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pygtail/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/socketIO_client/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/pygtail/core.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/run.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/server.conf" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/socketIO_client/tests.py" />
-    </list>
+    <list default="true" id="19159b06-bed5-41eb-9fd6-9145aea9679a" name="Default" comment="" />
     <ignored path="logmotor.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="19159b06-bed5-41eb-9fd6-9145aea9679a" time="1364354563811" ignored="false" />
@@ -26,6 +19,9 @@
     <disable_hints />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FileEditorManager">
+    <leaf />
+  </component>
   <component name="FindManager">
     <FindUsagesManager>
       <setting name="OPEN_NEW_TAB" value="false" />
@@ -77,16 +73,6 @@
             <PATH_ELEMENT>
               <option name="myItemId" value="logmotor" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="logmotor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="logmotor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
         </subPane>
@@ -262,6 +248,15 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/server.conf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="5" column="0" selection-start="61" selection-end="61" vertical-scroll-proportion="0.1421801">
+          <folding />
+        </state>
+      </provider>
+    </entry>
   </component>
 </project>
 

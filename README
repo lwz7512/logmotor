@@ -1,1 +1,11 @@
-This file was created by PyCharm 2.7.1 for binding GitHub repository
+------------ 2013/03/27------------------------
+This the start point of logmotor product, initially implement the normal raw text sending to django-socketio server by socketio-client, then to implement dynamic log file parser...
+
+Key features:
+
+1. realtime log change presentation to browser;
+2. log info visualize by Radar chart, and other chart(Gauge/Line);
+3. dynamic log parser create and config;
+4. easy yet powerful log parse grammar, like sql manner;
+5. log content search by key words;
+6. and more...
