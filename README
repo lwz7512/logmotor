@@ -1,4 +1,4 @@
------------- 2013/03/27------------------------
+============= 2013/03/27 =============================
 This the start point of logmotor product, initially implement the normal raw text sending to django-socketio server by socketio-client, then to implement dynamic log file parser...
 
 Key features:
@@ -9,3 +9,5 @@ Key features:
 4. easy yet powerful log parse grammar, like sql manner;
 5. log content search by key words;
 6. and more...
+
+
