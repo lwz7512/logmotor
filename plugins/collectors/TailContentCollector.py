@@ -1,7 +1,6 @@
 __author__ = 'lwz'
 
 import os
-import sys
 import logging
 
 from watchdog.events import FileSystemEventHandler
@@ -17,6 +16,9 @@ class TailContentCollector(FileSystemEventHandler):
         """
         self.offset_dir = offset_dir
         self.onchange = onchange
+
+    def mock(self):
+        print self.offset_dir
 
     def on_moved(self, event):
         super(TailContentCollector, self).on_moved(event)
@@ -43,11 +45,7 @@ class TailContentCollector(FileSystemEventHandler):
         # what = 'directory' if event.is_directory else 'file'
         # logging.info("Modified %s: %s", what, event.src_path)
         # split_path = None
-        if sys.platform == "win32":
-            split_path = "\\"
-        else:
-            split_path = "/"
-        log_file = event.src_path.split(split_path)
+        log_file = event.src_path.split("/")
 
         # prepare offset file directory
         if not os.path.exists(self.offset_dir):
@@ -61,7 +59,7 @@ class TailContentCollector(FileSystemEventHandler):
             decodeLog = appended.decode("gbk")
             logging.info("sending: %s", decodeLog)
             # execute callback function...
-            self.onchange(decodeLog)
+            self.onchange(event.src_path, decodeLog)
         else:
             logging.info("empty content: %s", event.src_path)
 
