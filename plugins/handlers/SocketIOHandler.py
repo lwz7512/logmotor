@@ -13,8 +13,10 @@ class SocketIOHandler(object):
         self.server_port = cfg['graphite_port']
         self.namespace = cfg['graphite_namespace']
 
-    def handle(self, non_metrics_json):
+    def handle(self, non_metrics):
         mainSocket = SocketIO(self.server_address, self.server_port, BaseNamespace)
-        newsSocket = mainSocket.connect(self.namespace, BaseNamespace)
-        newsSocket.message(non_metrics_json)
-        # newsSocket.emit('event name', {'message': log})
+        channel = mainSocket.connect(self.namespace, BaseNamespace)
+        channel.emit('alert', non_metrics, self.on_response)
+
+    def on_response(*args):
+        print 'emit non metrics success!'
