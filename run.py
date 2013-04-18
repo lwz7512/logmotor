@@ -92,7 +92,7 @@ def on_logfile_change(logfile, line):
         service_logfile = key.split('.')
         logfile_seg = logfile.split('/')
         # find the service name in log file directory, and find the log type in log file name...
-        if service_logfile[0] in logfile_seg and logfile_seg[-1].find(service_logfile[0]) > -1:
+        if service_logfile[0] in logfile_seg and service_logfile[1] in logfile_seg[-1]:
             workers[key][1].parse_line(line)  # call parser method
             workers[key][2].handle(workers[key][1].get_state())  # call handler method use parser results
             file_matched = True
