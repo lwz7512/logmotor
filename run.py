@@ -8,22 +8,26 @@ import ConfigParser
 
 from watchdog.observers import Observer
 
+
 # global dictionary to save the collector,parser,handler instance...
-workers = None
+workers = dict()
 
 
 def main():
+    logging.debug('starting logmotor agent...')
+
     cfg = load_config()
+    logging.debug('config loaded!')
 
     event_handlers = load_plugins(cfg)
+    logging.debug('plugins initialized!')
 
     observer = Observer()
     # TODO, TO ADD MULTIPLE EVENT HANDLERS...
     # 2013/04/17
     observer.schedule(event_handlers[0], cfg['log_dir'], recursive=True)
     observer.start()
-
-    logging.debug('log motor started...')
+    logging.debug('log motor running...')
     try:
         while True:
             time.sleep(1)
@@ -34,7 +38,7 @@ def main():
 
 def load_config():
     localDir = os.path.dirname(__file__)
-    srvConf = os.path.join(localDir, 'server.conf')
+    srvConf = os.path.join(localDir, 'agent.conf')
 
     configObj = ConfigParser.ConfigParser()
     configObj.read(srvConf)
@@ -46,7 +50,7 @@ def load_config():
         level = logging.WARN
     logging.basicConfig(level=level, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
-    cfg = dict
+    cfg = dict()
 
     cfg['log_dir'] = configObj.get('local', 'log_dir')
     cfg['cursor_dir'] = configObj.get('local', 'cursor_dir')
@@ -62,25 +66,42 @@ def load_config():
 
 
 def load_plugins(cfg):
+    # a parse principle list:
+    # key: service.logtype
+    # value: collector,parser,handler
     mappings = cfg['mapping']
     offset_dir = cfg['cursor_dir']
-
-    # Figure out where we are and start looking for plugins
-    current_file = os.path.abspath(__file__)
-    current_directory = os.path.abspath(os.path.join(current_file, os.path.pardir))
-    plugins_directory = current_directory + "/plugins"
+    collectors = []
 
     for key, value in mappings:
-        cph = value.split(',')
-        col_module = __import__('plugins.collectors.%s' % cph[0], globals(), locals(), [cph[0]])
-        col_inst = getattr(col_module, cph[0])(offset_dir, on_logfile_change)
-    #     TODO, IMPORT OTHER MODULE AND CREATE INSTANCE...LAST TO SAVE A TUPLE..
+        col_par_han = value.split(',')
+        col_module = __import__('plugins.collectors.%s' % col_par_han[0], fromlist=[col_par_han[0]])
+        col_inst = getattr(col_module, col_par_han[0])(offset_dir, on_logfile_change)
+        par_module = __import__('plugins.parsers.%s' % col_par_han[1], fromlist=[col_par_han[1]])
+        par_inst = getattr(par_module, col_par_han[1])()
+        han_module = __import__('plugins.handlers.%s' % col_par_han[2], fromlist=[col_par_han[2]])
+        han_inst = getattr(han_module, col_par_han[2])(cfg)
 
-    return []
+        workers[key] = (col_inst, par_inst, han_inst)  # cache the parsers and handlers for later use...
+        collectors.append(col_inst)
+    # return event handlers for observer use...
+    return collectors
 
 
 def on_logfile_change(logfile, line):
-    pass
+    file_matched = False
+    for key, value in workers.iteritems():
+        service_logfile = key.split('.')
+        logfile_seg = logfile.split('/')
+        # find the service name in log file directory, and find the log type in log file name...
+        if service_logfile[0] in logfile_seg and logfile_seg[-1].find(service_logfile[0]):
+            workers[key][1].parse_line(line)  # call parser method
+            workers[key][2].handle(workers[key][1].get_state())  # call handler method use parser results
+            file_matched = True
+            logging.debug('Handled one line using config of: %s' % key)
+            break
+    if file_matched is False:
+        logging.warning('Not found the corresponding parser/handler for: %s' % logfile)
 
 
 # ------------- main entrance -------------------------------

@@ -6,12 +6,12 @@ from socket import socket
 
 class CarbonAggreHandler(object):
 
-    def __init__(self, carbon_server, carbon_port):
+    def __init__(self, cfg):
         """
         save the server config..
         """
-        self.carbon_server = carbon_server
-        self.carbon_port = carbon_port
+        self.carbon_server = cfg['carbon_ip']
+        self.carbon_port = cfg['carbon_port']
 
     def handle(self, metrics):
         message = self.create_metric_str(metrics)

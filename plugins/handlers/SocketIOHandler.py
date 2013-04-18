@@ -5,17 +5,16 @@ from socketIO_client import SocketIO, BaseNamespace
 
 class SocketIOHandler(object):
 
-    def __init__(self, server_address, server_port, namespace):
+    def __init__(self, cfg):
         """
         save the server config..
         """
-        self.server_address = server_address
-        self.server_port = server_port
-        self.namespace = namespace
+        self.server_address = cfg['graphite_ip']
+        self.server_port = cfg['graphite_port']
+        self.namespace = cfg['graphite_namespace']
 
-    def handle(self, nonmetric):
+    def handle(self, non_metrics_json):
         mainSocket = SocketIO(self.server_address, self.server_port, BaseNamespace)
         newsSocket = mainSocket.connect(self.namespace, BaseNamespace)
-        newsSocket.message(nonmetric)
+        newsSocket.message(non_metrics_json)
         # newsSocket.emit('event name', {'message': log})
-

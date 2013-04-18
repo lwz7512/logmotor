@@ -29,6 +29,8 @@ class NginxAccessParser(LogsterParser):
         This function should digest the contents of one line at a time, updating
        object's state variables. Takes a single argument, the line to be parsed.
         """
+        # TODO, FIRST NEED TO RE INIT THE __init__ VALUES, EXCEPT THE REG..
+
         try:
             # Apply regular expression to each line and extract interesting bits.
             regMatch = self.reg.match(line)
