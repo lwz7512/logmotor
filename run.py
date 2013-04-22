@@ -50,6 +50,7 @@ def load_config():
     logging.debug('agent config file loaded!')
     cfg = dict()
 
+    cfg['local_ip'] = configObj.get('local', 'ip')
     cfg['log_dir'] = configObj.get('local', 'log_dir')
     cfg['cursor_dir'] = configObj.get('local', 'cursor_dir')
     cfg['graphite_ip'] = configObj.get('graphite', 'ip')
@@ -69,6 +70,8 @@ def load_plugins(cfg):
     # value: collector,parser,handler
     mappings = cfg['mapping']
     offset_dir = cfg['cursor_dir']
+    host = cfg['local_ip']
+
     collectors = []
 
     for key, value in mappings:
@@ -76,7 +79,7 @@ def load_plugins(cfg):
         col_module = __import__('plugins.collectors.%s' % col_par_han[0], fromlist=[col_par_han[0]])
         col_inst = getattr(col_module, col_par_han[0])(offset_dir, on_logfile_change)
         par_module = __import__('plugins.parsers.%s' % col_par_han[1], fromlist=[col_par_han[1]])
-        par_inst = getattr(par_module, col_par_han[1])()
+        par_inst = getattr(par_module, col_par_han[1])(host)
         han_module = __import__('plugins.handlers.%s' % col_par_han[2], fromlist=[col_par_han[2]])
         han_inst = getattr(han_module, col_par_han[2])(cfg)
 

@@ -1,6 +1,6 @@
 __author__ = 'lwz'
 
-from base import LogsterParser, LogsterParsingException
+from plugins.base import LogsterParser, LogsterParsingException
 
 
 class NginxErrorParser(LogsterParser):
