@@ -16,7 +16,7 @@ class NginxAccessParser(LogsterParser):
         :rtype : None
         :param host: where this agent live/exist
 
-        default access config:
+        default nginx access config:
         log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
@@ -27,7 +27,11 @@ class NginxAccessParser(LogsterParser):
                                 '"$http_referer" "$http_user_agent" '
                                 '$request_time $upstream_response_time $pipe';
         """
-        self.host = host
+        self.spiders = ['Sogou web spider', 'Baiduspider', 'bingbot',
+                        'EasouSpider', 'JikeSpider', 'msnbot', 'SurveyBot']
+        self.spider_visit_url = '/robots.txt'
+
+        self.host = host  # host machine that log file reside in
 
         self.remote_addr = None
         self.remote_user = None
@@ -35,21 +39,22 @@ class NginxAccessParser(LogsterParser):
         self.request_url = None
         self.request_time = None  # the time it took nginx to work on the request
         self.upstream_response_time = None
+        self.user_agent = None
 
-        self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
-                                \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
-                                (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>[^\"]*)\"\s
-                                \"(?P<http_user_agent>[^\"]*)\"\s\"(?P<http_x_forwarded_for>\S*)\"
-                                """, re.X)
+        # self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
+        #                         \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
+        #                         (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
+        #                         \"(?P<http_user_agent>.+)\"\s\"(?P<http_x_forwarded_for>\S*)\"
+        #                         """, re.X)
 
         # for timed_combined
-        # self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
-        #                          \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
-        #                          (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>[^\"]*)\"\s
-        #                          \"(?P<http_user_agent>[^\"]*)\"\s
-        #                          (?P<request_time>\S*)\s  # $request_time, request processing time in seconds with a milliseconds resolution; time elapsed between the first bytes were read from the client and the log write after the last bytes were sent to the client
-        #                          (?P<upstream_response_time>\S*)\s  # $upstream_response_time, Response time of upstream server(s) in seconds, with an accuracy of milliseconds.
-        #                          (?P<pipe>\S*)""", re.X)
+        self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
+                                 \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
+                                 (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
+                                 \"(?P<http_user_agent>.+)\"\s
+                                 (?P<request_time>\S*)\s  # $request_time, request processing time in seconds with a milliseconds resolution; time elapsed between the first bytes were read from the client and the log write after the last bytes were sent to the client
+                                 (?P<upstream_response_time>\S*)\s  # $upstream_response_time, Response time of upstream server(s) in seconds, with an accuracy of milliseconds.
+                                 (?P<pipe>\S*)""", re.X)
 
     def parse_line(self, line):
         """
@@ -70,6 +75,7 @@ class NginxAccessParser(LogsterParser):
                 self.request_url = results.get('request_url', '')
                 self.request_time = results.get('request_time', '')
                 self.upstream_response_time = results.get('upstream_response_time', '')
+                self.user_agent = results.get('http_user_agent', '')
 
                 return  regMatch
             else:
@@ -78,15 +84,22 @@ class NginxAccessParser(LogsterParser):
         except Exception, e:
             raise LogsterParsingException, "regmatch or contents failed with %s" % e
 
-    def get_state(self, duration):
+    def get_state(self, filter=True):
         """ Run any necessary calculations on the data collected from the logs
-        :param duration:
+        :param filter: filter that don't needed data
         and return a list of metric objects.
         """
+        if self.request_url is self.spider_visit_url:
+            return []
+        for spider in self.spiders:
+            if spider in self.user_agent:
+                return []
+
         timestamp = time_local_to_timestamp(self.time_local)
         res_metric = ResMetricObject('nginx.access.%s' % self.host,
-                                    self.request_time,
-                                    self.request_url,
-                                    timestamp)
+                                     self.request_time,
+                                     self.request_url,
+                                     timestamp,
+                                     self.remote_addr)
         # Return a list of metrics objects
         return [res_metric]

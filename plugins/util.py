@@ -9,7 +9,7 @@ import time
 
 # '2013-04-22 15:39:00'
 def simple_dateformat_to_datetime(date_str):
-    return datetime.datetime.fromtimestamp(time.mktime(time.strptime(date_str,"%Y-%m-%d %H:%M:%S")))
+    return datetime.fromtimestamp(time.mktime(time.strptime(date_str, "%Y-%m-%d %H:%M:%S")))
 
 
 # time_local: 18/Apr/2013:03:26:11
