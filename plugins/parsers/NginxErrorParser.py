@@ -38,7 +38,6 @@ class NginxErrorParser(LogsterParser):
         This function should digest the contents of one line at a time, updating
        object's state variables. Takes a single argument, the line to be parsed.
         """
-        # TODO, FIRST NEED TO RE INIT THE __init__ VALUES, EXCEPT THE REG..
 
         try:
             # Apply regular expression to each line and extract interesting bits.
@@ -55,10 +54,10 @@ class NginxErrorParser(LogsterParser):
 
                 return regMatch
             else:
-                raise LogsterParsingException, "regmatch failed to match"
+                raise LogsterParsingException("regmatch failed to match")
 
         except Exception, e:
-            raise LogsterParsingException, "regmatch or contents failed with %s" % e
+            raise LogsterParsingException("regmatch or contents failed with %s" % e)
 
     def get_state(self, filter=True):
         """ Run any necessary calculations on the data collected from the logs

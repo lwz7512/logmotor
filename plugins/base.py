@@ -57,4 +57,8 @@ class LogsterParsingException(Exception):
     """Raise this exception if the parse_line function wants to
         throw a 'recoverable' exception - i.e. you want parsing
         to continue but want to skip this line and log a failure."""
-    pass
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg

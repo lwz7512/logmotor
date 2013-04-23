@@ -21,23 +21,44 @@ class NginxAccessParser(LogsterParser):
                       '$status $body_bytes_sent "$http_referer" '
                       '"$http_user_agent" "$http_x_forwarded_for"';
 
-        custom access log format:
+        custom access log format: one blank after [$time_local]
         log_format timed_combined '$remote_addr - $remote_user [$time_local] '
                                 '"$request" $status $body_bytes_sent '
                                 '"$http_referer" "$http_user_agent" '
                                 '$request_time $upstream_response_time $pipe';
+
+        *** CAUTION HERE:***
+        In this parser, I used the log_format timed_combined borrowed from:
+        http://articles.slicehost.com/2010/8/27/customizing-nginx-web-logs
+        http://lincolnloop.com/blog/2010/nov/9/tracking-application-response-time-nginx/
+
+        But, I made a small modification after [$time_local], I delete one blank to their timed_combined format.
+        There has only ONE blank between [$time_local] and "$request".
+        I use this modified timed_combined format in my nginx config file,
+        so, the corresponding regular expression is: [(?P<time_local>.*?)\]\s
+
+        If you copy the timed_combined format directly from that pages and paste to you config file,
+        then, in order to make this parser work successfully, you need to APPEND \s AFTER (?P<time_local>.*?)\]\s
+        THAT IS: (?P<time_local>.*?)\]\s\s
+        See details blow in: self.reg
+
         """
         self.spiders = ['Sogou web spider', 'Baiduspider', 'bingbot',
                         'EasouSpider', 'JikeSpider', 'msnbot', 'SurveyBot']
         self.spider_visit_url = '/robots.txt'
 
-        self.host = host  # host machine that log file reside in
+        self.host = host  # host machine ip that log file reside in
 
         self.remote_addr = None
         self.remote_user = None
         self.time_local = None
         self.request_url = None
-        self.request_time = None  # the time it took nginx to work on the request
+        # $request_time, request processing time in seconds with a milliseconds resolution;
+        # time elapsed between the first bytes were read from the client
+        # and the log write after the last bytes were sent to the client
+        self.request_time = None
+        # $upstream_response_time, Response time of upstream server(s) in seconds,
+        # with an accuracy of milliseconds.
         self.upstream_response_time = None
         self.user_agent = None
 
@@ -48,21 +69,20 @@ class NginxAccessParser(LogsterParser):
         #                         """, re.X)
 
         # for timed_combined
-        self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
-                                 \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
-                                 (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
-                                 \"(?P<http_user_agent>.+)\"\s
-                                 (?P<request_time>\S*)\s  # $request_time, request processing time in seconds with a milliseconds resolution; time elapsed between the first bytes were read from the client and the log write after the last bytes were sent to the client
-                                 (?P<upstream_response_time>\S*)\s  # $upstream_response_time, Response time of upstream server(s) in seconds, with an accuracy of milliseconds.
-                                 (?P<pipe>\S*)""", re.X)
+        self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s
+                                \[(?P<time_local>.*?)\]\s  # one blank space here, may by you need addtional \s
+                                \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP/)*(?P<http_version>\d\.\d)\"\s
+                                (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
+                                \"(?P<http_user_agent>.+)\"\s
+                                (?P<request_time>\S*)\s
+                                (?P<upstream_response_time>\S*)\s
+                                (?P<pipe>\S*)""", re.X)
 
     def parse_line(self, line):
         """
         This function should digest the contents of one line at a time, updating
        object's state variables. Takes a single argument, the line to be parsed.
         """
-        # TODO, FIRST NEED TO RE INIT THE __init__ VALUES, EXCEPT THE REG..
-
         try:
             # Apply regular expression to each line and extract interesting bits.
             regMatch = self.reg.match(line)
@@ -77,12 +97,12 @@ class NginxAccessParser(LogsterParser):
                 self.upstream_response_time = results.get('upstream_response_time', '')
                 self.user_agent = results.get('http_user_agent', '')
 
-                return  regMatch
+                return regMatch
             else:
-                raise LogsterParsingException, "regmatch failed to match"
+                raise LogsterParsingException("reg match failed to match, re-check the reg expression !")
 
         except Exception, e:
-            raise LogsterParsingException, "regmatch or contents failed with %s" % e
+            raise LogsterParsingException("reg match or contents failed with %s" % e)
 
     def get_state(self, filter=True):
         """ Run any necessary calculations on the data collected from the logs
