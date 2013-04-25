@@ -56,10 +56,10 @@ class TailContentCollector(FileSystemEventHandler):
         # must use gbk encoding...
         appended = tailor.read()
         if appended:
-            decodeLog = appended.decode("gbk")
-            logging.info("sending: %s", decodeLog)
+            decodelines = appended.decode("gbk")
+            logging.info("sending: %s", decodelines)
             # execute callback function...
-            self.onchange(event.src_path, decodeLog)
+            self.onchange(event.src_path, decodelines)
         else:
             logging.info("empty content: %s", event.src_path)
 

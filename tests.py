@@ -50,5 +50,11 @@ class TestLineParsers(unittest.TestCase):
         self.assertIsNotNone(matched)
 
 
+class TestJsonDump(unittest.TestCase):
+
+    def test_metri_list_serialize(self):
+        print '---------- TEST METRIC LIST SERIALIZE ------'
+
+
 if __name__ == '__main__':
     unittest.main()

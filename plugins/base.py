@@ -53,10 +53,10 @@ class LogsterParser(object):
         raise RuntimeError("Implement me!")
 
 
-class LogsterParsingException(Exception):
-    """Raise this exception if the parse_line function wants to
-        throw a 'recoverable' exception - i.e. you want parsing
-        to continue but want to skip this line and log a failure."""
+class LogMotorException(Exception):
+    """
+    Raise this exception if sending metric or non-metric to server
+    """
     def __init__(self, msg):
         self.msg = msg
 

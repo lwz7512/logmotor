@@ -2,7 +2,7 @@ __author__ = 'lwz'
 
 import re
 
-from plugins.base import ResMetricObject, LogsterParser, LogsterParsingException
+from plugins.base import ResMetricObject, LogsterParser, LogMotorException
 from plugins.util import time_local_to_timestamp
 
 
@@ -77,6 +77,20 @@ class NginxAccessParser(LogsterParser):
                                 (?P<request_time>\S*)\s
                                 (?P<upstream_response_time>\S*)\s
                                 (?P<pipe>\S*)""", re.X)
+        # save the metrics or non-metrics
+        self.states = None
+
+    # parse the line separated by \n
+    def parse_lines(self, lines):
+        self.states = []
+        splits = lines.split('\n')
+        for line in splits:
+            self.parse_line(line)
+            self.states.append(self.get_state())
+
+    # get the generated data...
+    def get_states(self):
+        return self.states
 
     def parse_line(self, line):
         """
@@ -99,10 +113,10 @@ class NginxAccessParser(LogsterParser):
 
                 return regMatch
             else:
-                raise LogsterParsingException("reg match failed to match, re-check the reg expression !")
+                raise LogMotorException("reg match failed to match, re-check the reg expression !")
 
         except Exception, e:
-            raise LogsterParsingException("reg match or contents failed with %s" % e)
+            raise LogMotorException("reg match or contents failed with %s" % e)
 
     def get_state(self, filter=True):
         """ Run any necessary calculations on the data collected from the logs
@@ -122,4 +136,4 @@ class NginxAccessParser(LogsterParser):
                                      timestamp,
                                      self.remote_addr)
         # Return a list of metrics objects
-        return [res_metric]
+        return res_metric

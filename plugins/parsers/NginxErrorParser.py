@@ -2,7 +2,7 @@ __author__ = 'lwz'
 
 import re
 
-from plugins.base import AlertMetricObject, LogsterParser, LogsterParsingException
+from plugins.base import AlertMetricObject, LogsterParser, LogMotorException
 from plugins.util import string_toTimestamp
 
 
@@ -13,8 +13,6 @@ class NginxErrorParser(LogsterParser):
         Initialize any data structures or variables needed for keeping track
         of the tasty bits we find in the log we are parsing.
         """
-        self.levels = {'alert': '1', 'crit': '2', 'error': '3', 'warn': '4', 'notice': '5'}
-
         self.host = host
 
         self.datetime = None
@@ -24,6 +22,7 @@ class NginxErrorParser(LogsterParser):
         self.request = None
         self.domain = None
 
+        self.levels = {'alert': '1', 'crit': '2', 'error': '3', 'warn': '4', 'notice': '5'}
         self.reg = re.compile("""(?P<datetime>.*?)\s
                                 \[(?P<errortype>.+)\]\s.*?:\s
                                 (?P<errormessage>.+),\s
@@ -32,6 +31,20 @@ class NginxErrorParser(LogsterParser):
                                 request:\s\"(?P<request>.+)\",\s
                                 host:\s\"(?P<domain>.+)\"
                                 """, re.X)
+        # save the metrics or non-metrics
+        self.states = None
+
+    # parse the line separated by \n
+    def parse_lines(self, lines):
+        self.states = []
+        splits = lines.split('\n')
+        for line in splits:
+            self.parse_line(line)
+            self.states.append(self.get_state())
+
+    # get the generated data...
+    def get_states(self):
+        return self.states
 
     def parse_line(self, line):
         """
@@ -54,10 +67,10 @@ class NginxErrorParser(LogsterParser):
 
                 return regMatch
             else:
-                raise LogsterParsingException("regmatch failed to match")
+                raise LogMotorException("regmatch failed to match")
 
         except Exception, e:
-            raise LogsterParsingException("regmatch or contents failed with %s" % e)
+            raise LogMotorException("regmatch or contents failed with %s" % e)
 
     def get_state(self, filter=True):
         """ Run any necessary calculations on the data collected from the logs
@@ -71,4 +84,4 @@ class NginxErrorParser(LogsterParser):
                                          string_toTimestamp(self.datetime, '%Y/%m/%d %H:%M:%S'),
                                          self.client)
         # Return a list of metrics objects
-        return [error_metric]
+        return error_metric
