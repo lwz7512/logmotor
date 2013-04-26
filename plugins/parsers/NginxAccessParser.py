@@ -86,7 +86,8 @@ class NginxAccessParser(LogsterParser):
         splits = lines.split('\n')
         for line in splits:
             self.parse_line(line)
-            self.states.append(self.get_state())
+            if self.get_state():
+                self.states.append(self.get_state())
 
     # get the generated data...
     def get_states(self):
@@ -124,10 +125,12 @@ class NginxAccessParser(LogsterParser):
         and return a list of metric objects.
         """
         if self.request_url is self.spider_visit_url:
-            return []
+            return None
         for spider in self.spiders:
             if spider in self.user_agent:
-                return []
+                return None
+        if float(self.request_time) == 0:  # filter the invalid value
+            return None
 
         timestamp = time_local_to_timestamp(self.time_local)
         res_metric = ResMetricObject('nginx.access.%s' % self.host,

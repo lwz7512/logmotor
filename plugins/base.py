@@ -16,6 +16,11 @@ class AlertMetricObject(object):
         self.timestamp = timestamp  # milliseconds when this event occurred
         self.original = original  # who invoke this problem
 
+    # for serialization usage
+    def to_dict(self):
+        return {'name': self.name, 'level': self.level, 'message': self.message,
+                'cause': self.cause, 'timestamp': self.timestamp, 'original': self.original}
+
 
 class ResMetricObject(object):
     """
@@ -31,6 +36,11 @@ class ResMetricObject(object):
         self.timestamp = timestamp  # milliseconds when the value created
         self.original = original  # the sponsor that cause this event/data, such as client visit...
 
+    # for serialization usage
+    def to_dict(self):
+        return {'name': self.name, 'value': self.value, 'resource': self.resource,
+                'timestamp': self.timestamp, 'original': self.original}
+
 
 class MetricObject(object):
     """General representation of a metric that can be used in many contexts"""
@@ -40,6 +50,11 @@ class MetricObject(object):
         self.units = units
         self.type = type
         self.timestamp = timestamp
+
+    # for serialization usage
+    def to_dict(self):
+        return {'name': self.name, 'value': self.value, 'units': self.units,
+                'type': self.type, 'timestamp': self.timestamp}
 
 
 class LogsterParser(object):

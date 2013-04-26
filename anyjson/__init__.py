@@ -43,6 +43,12 @@ _fields = ("modname", "encoder", "encerror",
            "decoder", "decerror", "filedecoder")
 
 
+# mock function for explict publish to this module, so the error gone in pycharm
+# 2013/04/26 by lwz7512
+def dumps(obj):
+    pass
+
+
 class _JsonImplementation(object):
     """Incapsulates a JSON implementation"""
 
@@ -129,12 +135,10 @@ else:
     else:
         raise ImportError("No supported JSON module found")
 
-
     def loads(value):
         """Serialize the object to JSON."""
         return implementation.loads(value)
     deserialize = loads   # compat
-
 
     def dumps(value):
         """Deserialize JSON-encoded object to a Python object."""

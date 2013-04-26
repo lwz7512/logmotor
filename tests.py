@@ -1,12 +1,12 @@
 __author__ = 'lwz'
 
-import re
+import unittest
+
+from anyjson import dumps
 
 from plugins.parsers.NginxAccessParser import NginxAccessParser
 from plugins.parsers.NginxErrorParser import NginxErrorParser
-from plugins.util import time_local_to_timestamp
-
-import unittest
+from plugins.base import MetricObject
 
 
 class TestLineParsers(unittest.TestCase):
@@ -52,9 +52,24 @@ class TestLineParsers(unittest.TestCase):
 
 class TestJsonDump(unittest.TestCase):
 
-    def test_metri_list_serialize(self):
+    def test_dict_list_serialize(self):
         print '---------- TEST METRIC LIST SERIALIZE ------'
+        print 'serialized dic: %s' % dumps({'key': 0})
+        print 'serialized array: %s' % dumps(['a', 'b', 1])
+
+    def test_metric_serialize(self):
+        print '---------- TEST METRIC SERIALIZE -----------'
+        mo = MetricObject('test.metric', 0, 'm')
+        print dumps(mo.to_dict())
+
+    def test_dict_in_list_serialize(self):
+        print '---------- TEST DIC IN LIST SERIALIZE ------'
+        mo = MetricObject('test.metric', 0, 'm')
+        mt = MetricObject('two.metric', 1, 's')
+        print dumps([mo.to_dict(), mt.to_dict()])
 
 
 if __name__ == '__main__':
-    unittest.main()
+    # unittest.main()
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestJsonDump)
+    unittest.TextTestRunner(verbosity=2).run(suite)
