@@ -23,7 +23,8 @@ def main():
     logging.debug('plugins initialized!')
 
     observer = Observer()
-    observer.schedule(TailContentCollector(cfg['cursor_dir'], on_logfile_changed), cfg['log_dir'], recursive=True)
+    event_handler = TailContentCollector(cfg['cursor_dir'], on_logfile_changed)
+    observer.schedule(event_handler, cfg['log_dir'], recursive=True)
     observer.start()
     logging.debug('log motor running...')
     try:
