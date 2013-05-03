@@ -62,6 +62,14 @@ class NginxAccessParser(LogsterParser):
         self.upstream_response_time = None
         self.user_agent = None
 
+        # for nginx/1.4.0
+        self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
+                                \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
+                                (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
+                                \"(?P<http_user_agent>.+)\"
+                                """, re.X)
+
+        # for nginx/0.8.54 log_format  main
         # self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
         #                         \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
         #                         (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
@@ -69,22 +77,25 @@ class NginxAccessParser(LogsterParser):
         #                         """, re.X)
 
         # for timed_combined
-        self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s
-                                \[(?P<time_local>.*?)\]\s  # one blank space here, may by you need addtional \s
-                                \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP/)*(?P<http_version>\d\.\d)\"\s
-                                (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
-                                \"(?P<http_user_agent>.+)\"\s
-                                (?P<request_time>\S*)\s
-                                (?P<upstream_response_time>\S*)\s
-                                (?P<pipe>\S*)""", re.X)
+        # self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s
+        #                         \[(?P<time_local>.*?)\]\s  # one blank space here, may by you need addtional \s
+        #                         \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP/)*(?P<http_version>\d\.\d)\"\s
+        #                         (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
+        #                         \"(?P<http_user_agent>.+)\"\s
+        #                         (?P<request_time>\S*)\s
+        #                         (?P<upstream_response_time>\S*)\s
+        #                         (?P<pipe>\S*)""", re.X)
         # save the metrics or non-metrics
         self.states = None
 
     # parse the line separated by \n
-    def parse_lines(self, lines):
+    def parse_lines(self, lines, last=10):
         self.states = []
         splits = lines.split('\n')
-        for line in splits:
+        # ONLY GET THE LAST TEN LINES...
+        for line in splits[-last:]:
+            if len(line) == 0:
+                continue
             self.parse_line(line)
             if self.get_state():
                 self.states.append(self.get_state())
@@ -108,8 +119,8 @@ class NginxAccessParser(LogsterParser):
                 self.remote_user = results.get('remote_user', '')
                 self.time_local = results.get('time_local', 'xxxxxx')[:-6]  # remove +0800
                 self.request_url = results.get('request_url', '')
-                self.request_time = results.get('request_time', '')
-                self.upstream_response_time = results.get('upstream_response_time', '')
+                self.request_time = results.get('request_time', '0')
+                self.upstream_response_time = results.get('upstream_response_time', '0')
                 self.user_agent = results.get('http_user_agent', '')
 
                 return regMatch
@@ -129,8 +140,8 @@ class NginxAccessParser(LogsterParser):
         for spider in self.spiders:
             if spider in self.user_agent:
                 return None
-        if float(self.request_time) == 0:  # filter the invalid value
-            return None
+        # if float(self.request_time) == 0:  # filter the invalid value
+        #     return None
 
         timestamp = time_local_to_timestamp(self.time_local)
         res_metric = ResMetricObject('nginx.access.%s' % self.host,

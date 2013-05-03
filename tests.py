@@ -15,9 +15,11 @@ class TestLineParsers(unittest.TestCase):
         print '------------ TEST NGINX ACCESS PARSER --------------'
         timed_combined_log_sample = '66.249.71.173 - - [08/Nov/2010:14:16:18 -0600] "GET /blog/2010/apr/30/installing-geodjango-dependencies-homebrew/ HTTP/1.1" 200 6569 "-" "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" 0.640 0.640 .'
         main_log_sample = '220.181.89.166 - - [18/Apr/2013:03:26:11 +0800] "GET / HTTP/1.1" 200 7512 "-" "Sogou web spider/4.0(+http://www.sogou.com/docs/help/webmasters.htm#07)" "-"'
+        nginx140 = '127.0.0.1 - - [03/May/2013:19:40:16 +0800] "GET /static/img/tag_icon.png HTTP/1.1" 304 0 "http://localhost/" "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.97 Safari/537.11"'
 
         access_parser = NginxAccessParser('localhost')
-        matched = access_parser.parse_line(timed_combined_log_sample)
+        matched = access_parser.parse_line(nginx140)
+        # matched = access_parser.parse_line(timed_combined_log_sample)
         # matched = access_parser.parse_line(main_log_sample)
 
         print 'nginx access parse matched!'

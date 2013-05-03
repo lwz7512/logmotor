@@ -15,6 +15,7 @@ class MetricAggreHandler(object):
         self.carbon_port = cfg['carbon_port']
 
     def handle(self, metrics):
+        print 'handle metric...'
         if metrics is None or len(metrics) == 0:
             return
 

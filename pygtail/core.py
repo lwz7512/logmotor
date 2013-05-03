@@ -47,8 +47,10 @@ class Pygtail(object):
         # if offset file exists, open and parse it
         if exists(self._offset_file):
             offset_fh = open(self._offset_file, "r")
-            (self._offset_file_inode, self._offset) = \
-                [string.atoi(line.strip()) for line in offset_fh]
+            # FIXME, SAVE THE LINES FOR LATER HANDLE...
+            # 2013/05/03
+            offset_lines = offset_fh.readlines()
+            (self._offset_file_inode, self._offset) = [string.atoi(line.strip()) for line in offset_lines]
             offset_fh.close()
             if self._offset_file_inode != stat(self.filename).st_ino:
                 # The inode has changed, so the file might have been rotated.
@@ -110,8 +112,13 @@ class Pygtail(object):
         """
         if not self._fh or self._fh.closed:
             filename = self._rotated_logfile or self.filename
-            self._fh = open(filename, "r")
-            self._fh.seek(self._offset)
+            # FIXME, HANDLE EXCEPTION WHILE Permission denied
+            # 2013/05/03
+            try:
+                self._fh = open(filename, "r")
+                self._fh.seek(self._offset)
+            except IOError, e:
+                print e
 
         return self._fh
 

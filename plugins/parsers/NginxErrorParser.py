@@ -35,10 +35,11 @@ class NginxErrorParser(LogsterParser):
         self.states = None
 
     # parse the line separated by \n
-    def parse_lines(self, lines):
+    def parse_lines(self, lines, last=10):
         self.states = []
         splits = lines.split('\n')
-        for line in splits:
+        # ONLY GET THE LAST TEN LINES...
+        for line in splits[-last:]:
             self.parse_line(line)
             self.states.append(self.get_state())
 

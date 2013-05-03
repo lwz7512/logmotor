@@ -25,9 +25,10 @@ class SocketIOHandler(object):
         self.socketIO = SocketIO(self.server_address, self.server_port, BaseNamespace)
         self.channel = self.socketIO.connect(self.namespace, BaseNamespace)
         self.channel.emit('alert', nm_list, self.on_response)  # send to server
+        self.socketIO.wait(forCallbacks=True)
         print 'emitting alert: %s' % dumps(nm_list)
 
     def on_response(self, *args):
         # is it necessary?
-        self.channel.disconnect()
+        self.socketIO.disconnect()
         print 'emit non metrics success!'

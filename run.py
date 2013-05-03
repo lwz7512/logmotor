@@ -85,8 +85,8 @@ def load_plugins(cfg):
         col_han = value.split(',')
         col_module = __import__('plugins.collectors.%s' % col_han[0], fromlist=[col_han[0]])
         col_inst = getattr(col_module, col_han[0])()
-        han_module = __import__('plugins.handlers.%s' % par_han[1], fromlist=[par_han[1]])
-        han_inst = getattr(han_module, par_han[1])(cfg)
+        han_module = __import__('plugins.handlers.%s' % col_han[1], fromlist=[col_han[1]])
+        han_inst = getattr(han_module, col_han[1])(cfg)
 
         pfm_workers[key] = (col_inst, han_inst)
 
@@ -114,15 +114,15 @@ def on_logfile_changed(logfile, lines):
         # find the service name in log file directory, and find the log type in log file name...
         if service_logfile[0] in logfile_seg and service_logfile[1] in logfile_seg[-1]:
             file_matched = True
-            logging.debug('processing line with: %s' % key)
+            # logging.debug('processing line with: %s' % key)
             try:
                 par_han[0].parse_lines(lines)  # call parser method
-                par_han[1].handle(par_han[1].get_states())  # call handler method use parser results
+                par_han[1].handle(par_han[0].get_states())  # call handler method use parser results
             except LogMotorException, e:
                 logging.error('processing line error: %s' % e)
                 break
             else:
-                logging.debug('One line handled successfully using config of: %s' % key)
+                # logging.debug('One line handled successfully using config of: %s' % key)
                 break
 
     if file_matched is False:
