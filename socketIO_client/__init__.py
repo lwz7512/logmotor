@@ -29,7 +29,8 @@ class BaseNamespace(object):  # pragma: no cover
         print '[Message] %s' % messageData
 
     def on_(self, eventName, *eventArguments):
-        print '[Event] %s%s' % (eventName, eventArguments)
+        print '[Event] %s:%s' % (eventName, 'socketIO_client')
+        # print '[Event] %s%s' % (eventName, eventArguments)
 
     def on_open(self, *args):
         print '[Open]', args

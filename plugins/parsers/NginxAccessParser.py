@@ -119,8 +119,8 @@ class NginxAccessParser(LogsterParser):
                 self.remote_user = results.get('remote_user', '')
                 self.time_local = results.get('time_local', 'xxxxxx')[:-6]  # remove +0800
                 self.request_url = results.get('request_url', '')
-                self.request_time = results.get('request_time', '0')
-                self.upstream_response_time = results.get('upstream_response_time', '0')
+                self.request_time = results.get('request_time', '')
+                self.upstream_response_time = results.get('upstream_response_time', '')
                 self.user_agent = results.get('http_user_agent', '')
 
                 return regMatch
@@ -135,12 +135,21 @@ class NginxAccessParser(LogsterParser):
         :param filter: filter that don't needed data
         and return a list of metric objects.
         """
-        if self.request_url is self.spider_visit_url:
+        # FILTER THE INVALID URL
+        if self.request_url is self.spider_visit_url or self.request_url is '/':
             return None
+        # FILTER THE REQUEST FROM SPIDER
         for spider in self.spiders:
             if spider in self.user_agent:
                 return None
-        # if float(self.request_time) == 0:  # filter the invalid value
+        # FILTER STATIC FILES USE REGULAR EXPRESSION...
+        reg = '\.(htm|html|git|jpg|jpeg|png|bmp|ico|css|js|txt)$'
+        match = re.search(reg, self.request_url)
+        if match:
+            return None
+
+        # FIXME, TO FILTER THE INVALID VALUE...
+        # if len(self.request_time) == 0 or float(self.request_time) == 0:
         #     return None
 
         timestamp = time_local_to_timestamp(self.time_local)

@@ -22,8 +22,10 @@ def main():
     load_plugins(cfg)
     logging.debug('plugins initialized!')
 
-    observer = Observer()
+    clear_offsets(cfg['cursor_dir'])
     event_handler = TailContentCollector(cfg['cursor_dir'], on_logfile_changed)
+
+    observer = Observer()
     observer.schedule(event_handler, cfg['log_dir'], recursive=True)
     observer.start()
     logging.debug('log motor running...')
@@ -36,6 +38,12 @@ def main():
     observer.join()
 
 
+def clear_offsets(directory):
+    os.chdir(directory)
+    for f in os.listdir('.'):
+        os.remove(f)
+
+
 def load_config():
     localDir = os.path.dirname(__file__)
     srvConf = os.path.join(localDir, 'agent.conf')
@@ -44,11 +52,9 @@ def load_config():
     configObj.read(srvConf)
 
     log_level = configObj.get('trace', 'level')
-    if log_level == 'debug':
-        level = logging.DEBUG
-    else:
-        level = logging.WARN
-    logging.basicConfig(level=level, format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    level_dict = {'debug': logging.DEBUG, 'info': logging.INFO, 'warn': logging.WARN, 'error': logging.ERROR}
+
+    logging.basicConfig(level=level_dict[log_level], format='%(asctime)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     logging.debug('agent config file loaded!')
 
     cfg = dict()
@@ -58,6 +64,7 @@ def load_config():
     cfg['graphite_ip'] = configObj.get('graphite', 'ip')
     cfg['graphite_port'] = configObj.get('graphite', 'port')
     cfg['graphite_namespace'] = configObj.get('graphite', 'namespace')
+    cfg['graphite_event'] = configObj.get('graphite', 'event')
     cfg['carbon_ip'] = configObj.get('carbon', 'ip')
     cfg['carbon_port'] = configObj.get('carbon', 'port')
 
@@ -114,7 +121,7 @@ def on_logfile_changed(logfile, lines):
         # find the service name in log file directory, and find the log type in log file name...
         if service_logfile[0] in logfile_seg and service_logfile[1] in logfile_seg[-1]:
             file_matched = True
-            # logging.debug('processing line with: %s' % key)
+            logging.debug('processing line with: %s' % key)
             try:
                 par_han[0].parse_lines(lines)  # call parser method
                 par_han[1].handle(par_han[0].get_states())  # call handler method use parser results
