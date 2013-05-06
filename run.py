@@ -122,9 +122,9 @@ def on_logfile_changed(logfile, lines):
             file_matched = True
             logging.debug('processing line with: %s' % key)
             try:
-                # FIXME, to specify the total number of lines fetched each startup
+                # FIXME, to specify the max number of lines fetched each startup
                 # 2013/05/06
-                par_han[0].parse_lines(lines)  # call parser method
+                par_han[0].parse_lines(lines, 100)  # call parser method
                 par_han[1].handle(par_han[0].get_states())  # call handler method use parser results
             except LogMotorException, e:
                 logging.error('processing line error: %s' % e)

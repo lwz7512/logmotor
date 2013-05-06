@@ -90,7 +90,7 @@ class NginxAccessParser(LogsterParser):
         self.states = None
 
     # parse the line separated by \n
-    def parse_lines(self, lines, last=10):
+    def parse_lines(self, lines, last=0):
         self.states = []
         splits = lines.split('\n')
         # ONLY GET THE LAST TEN LINES...
