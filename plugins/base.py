@@ -15,11 +15,13 @@ class AlertMetricObject(object):
         self.cause = cause  # something that cause the problem
         self.timestamp = timestamp  # milliseconds when this event occurred
         self.original = original  # who invoke this problem
+        self.type = 'alert'  # object type used by server
 
     # for serialization usage
     def to_dict(self):
         return {'name': self.name, 'level': self.level, 'message': self.message,
-                'cause': self.cause, 'timestamp': self.timestamp, 'original': self.original}
+                'cause': self.cause, 'timestamp': self.timestamp, 'original': self.original,
+                'type': self.type}
 
 
 class ResMetricObject(object):
@@ -35,20 +37,22 @@ class ResMetricObject(object):
         self.resource = resource  # target or sub object to correspond the value created by service/host
         self.timestamp = timestamp  # milliseconds when the value created
         self.original = original  # the sponsor that cause this event/data, such as client visit...
+        self.type = 'res'  # object type used by server
 
     # for serialization usage
     def to_dict(self):
         return {'name': self.name, 'value': self.value, 'resource': self.resource,
-                'timestamp': self.timestamp, 'original': self.original}
+                'timestamp': self.timestamp, 'original': self.original,
+                'type': self.type}
 
 
 class MetricObject(object):
     """General representation of a metric that can be used in many contexts"""
-    def __init__(self, name, value, units='', type='float', timestamp=int(time())):
+    def __init__(self, name, value, units='', timestamp=int(time())):
         self.name = name
         self.value = value
         self.units = units
-        self.type = type
+        self.type = 'metric'
         self.timestamp = timestamp
 
     # for serialization usage

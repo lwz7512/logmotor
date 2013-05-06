@@ -1,6 +1,7 @@
 __author__ = 'lwz'
 
 import re
+import logging
 
 from plugins.base import ResMetricObject, LogsterParser, LogMotorException
 from plugins.util import time_local_to_timestamp
@@ -63,11 +64,11 @@ class NginxAccessParser(LogsterParser):
         self.user_agent = None
 
         # for nginx/1.4.0
-        self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
-                                \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
-                                (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
-                                \"(?P<http_user_agent>.+)\"
-                                """, re.X)
+        # self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
+        #                         \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP\/)*(?P<http_version>\d\.\d)\"\s
+        #                         (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
+        #                         \"(?P<http_user_agent>.+)\"
+        #                         """, re.X)
 
         # for nginx/0.8.54 log_format  main
         # self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s\[(?P<time_local>.*?)\]\s
@@ -76,15 +77,15 @@ class NginxAccessParser(LogsterParser):
         #                         \"(?P<http_user_agent>.+)\"\s\"(?P<http_x_forwarded_for>\S*)\"
         #                         """, re.X)
 
-        # for timed_combined
-        # self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s
-        #                         \[(?P<time_local>.*?)\]\s  # one blank space here, may by you need addtional \s
-        #                         \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP/)*(?P<http_version>\d\.\d)\"\s
-        #                         (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
-        #                         \"(?P<http_user_agent>.+)\"\s
-        #                         (?P<request_time>\S*)\s
-        #                         (?P<upstream_response_time>\S*)\s
-        #                         (?P<pipe>\S*)""", re.X)
+        # for timed_combined format
+        self.reg = re.compile("""(?P<remote_addr>\S*)\s-\s(?P<remote_user>\S*)\s
+                                \[(?P<time_local>.*?)\]\s  # one blank space here, may by you need addtional \s
+                                \"(?P<request_method>\S*)\s*(?P<request_url>\S*)\s*(HTTP/)*(?P<http_version>\d\.\d)\"\s
+                                (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
+                                \"(?P<http_user_agent>.+)\"\s
+                                (?P<request_time>\S*)\s
+                                (?P<upstream_response_time>\S*)\s
+                                (?P<pipe>\S*)""", re.X)
         # save the metrics or non-metrics
         self.states = None
 
@@ -94,11 +95,16 @@ class NginxAccessParser(LogsterParser):
         splits = lines.split('\n')
         # ONLY GET THE LAST TEN LINES...
         for line in splits[-last:]:
-            if len(line) == 0:
+            if len(line) == 0:  # skip the blank line
                 continue
-            self.parse_line(line)
-            if self.get_state():
-                self.states.append(self.get_state())
+            try:
+                self.parse_line(line)
+            except LogMotorException:
+                logging.warning('Parse line error, skipped the line...')
+            else:
+                if self.get_state():
+                    self.states.append(self.get_state())
+                    logging.debug('Got one Access...')
 
     # get the generated data...
     def get_states(self):
@@ -136,7 +142,7 @@ class NginxAccessParser(LogsterParser):
         and return a list of metric objects.
         """
         # FILTER THE INVALID URL
-        if self.request_url is self.spider_visit_url or self.request_url is '/':
+        if self.request_url == self.spider_visit_url:
             return None
         # FILTER THE REQUEST FROM SPIDER
         for spider in self.spiders:
@@ -149,7 +155,7 @@ class NginxAccessParser(LogsterParser):
             return None
 
         # FIXME, TO FILTER THE INVALID VALUE...
-        # if len(self.request_time) == 0 or float(self.request_time) == 0:
+        # if self.request_time.isdigit() is False or float(self.request_time) == 0:
         #     return None
 
         timestamp = time_local_to_timestamp(self.time_local)

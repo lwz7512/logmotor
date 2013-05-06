@@ -64,7 +64,6 @@ def load_config():
     cfg['graphite_ip'] = configObj.get('graphite', 'ip')
     cfg['graphite_port'] = configObj.get('graphite', 'port')
     cfg['graphite_namespace'] = configObj.get('graphite', 'namespace')
-    cfg['graphite_event'] = configObj.get('graphite', 'event')
     cfg['carbon_ip'] = configObj.get('carbon', 'ip')
     cfg['carbon_port'] = configObj.get('carbon', 'port')
 
@@ -123,6 +122,8 @@ def on_logfile_changed(logfile, lines):
             file_matched = True
             logging.debug('processing line with: %s' % key)
             try:
+                # FIXME, to specify the total number of lines fetched each startup
+                # 2013/05/06
                 par_han[0].parse_lines(lines)  # call parser method
                 par_han[1].handle(par_han[0].get_states())  # call handler method use parser results
             except LogMotorException, e:

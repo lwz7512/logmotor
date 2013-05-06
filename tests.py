@@ -36,10 +36,11 @@ class TestLineParsers(unittest.TestCase):
 
     def test_nginx_error_parser(self):
         print '------------ TEST NGINX ERROR PARSER --------------'
-        log_sample = '2013/04/18 04:24:08 [error] 533#0: *1116 open() "/usr/share/nginx/html/logtoeye/robots.txt" failed (2: No such file or directory), client: 157.55.35.34, server: logtoeye.com, request: "GET /robots.txt HTTP/1.1", host: "ipintu.com"'
+        nginx_error_085 = '2013/04/18 04:24:08 [error] 533#0: *1116 open() "/usr/share/nginx/html/logtoeye/robots.txt" failed (2: No such file or directory), client: 157.55.35.34, server: logtoeye.com, request: "GET /robots.txt HTTP/1.1", host: "ipintu.com"'
         # matched = re.match('(?P<datetime>.*?)\s', '2013/04/18 04:24:08 ')
+        nginx_error_140 = '2013/05/06 11:56:08 [notice] 3836#0: signal process started'
         error_parser = NginxErrorParser('localhost')
-        matched = error_parser.parse_line(log_sample)
+        matched = error_parser.parse_line(nginx_error_140)
 
         print 'nginx error parse matched!'
         print 'datetime: %s' % error_parser.datetime

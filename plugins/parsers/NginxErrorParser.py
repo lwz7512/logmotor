@@ -1,7 +1,7 @@
 __author__ = 'lwz'
 
 import re
-
+import logging
 from plugins.base import AlertMetricObject, LogsterParser, LogMotorException
 from plugins.util import string_toTimestamp
 
@@ -23,13 +23,19 @@ class NginxErrorParser(LogsterParser):
         self.domain = None
 
         self.levels = {'alert': '1', 'crit': '2', 'error': '3', 'warn': '4', 'notice': '5'}
+        # for nginx 0.8.5
+        # self.reg = re.compile("""(?P<datetime>.*?)\s
+        #                         \[(?P<errortype>.+)\]\s.*?:\s
+        #                         (?P<errormessage>.+),\s
+        #                         client:\s(?P<client>.+),\s
+        #                         server:\s(?P<server>.+),\s
+        #                         request:\s\"(?P<request>.+)\",\s
+        #                         host:\s\"(?P<domain>.+)\"
+        #                         """, re.X)
+        # for nginx 1.4.0
         self.reg = re.compile("""(?P<datetime>.*?)\s
                                 \[(?P<errortype>.+)\]\s.*?:\s
-                                (?P<errormessage>.+),\s
-                                client:\s(?P<client>.+),\s
-                                server:\s(?P<server>.+),\s
-                                request:\s\"(?P<request>.+)\",\s
-                                host:\s\"(?P<domain>.+)\"
+                                (?P<errormessage>.+)
                                 """, re.X)
         # save the metrics or non-metrics
         self.states = None
@@ -40,8 +46,16 @@ class NginxErrorParser(LogsterParser):
         splits = lines.split('\n')
         # ONLY GET THE LAST TEN LINES...
         for line in splits[-last:]:
-            self.parse_line(line)
-            self.states.append(self.get_state())
+            if len(line) == 0:  # skip the blank line
+                continue
+            try:
+                self.parse_line(line)
+            except LogMotorException:
+                logging.warning('Parse line error, skipped the line...')
+            else:
+                if self.get_state():
+                    self.states.append(self.get_state())
+                    logging.debug('Got one Error...')
 
     # get the generated data...
     def get_states(self):
