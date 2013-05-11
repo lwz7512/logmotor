@@ -1,6 +1,7 @@
 __author__ = 'lwz'
 
 from time import time
+import hashlib
 
 
 class AlertMetricObject(object):
@@ -17,11 +18,16 @@ class AlertMetricObject(object):
         self.original = original  # who invoke this problem
         self.type = 'alert'  # object type used by server
 
+    def create_uid(self):
+        tag = ''.join([self.name, str(self.timestamp)])
+        m = hashlib.md5(tag)
+        return m.hexdigest()
+
     # for serialization usage
     def to_dict(self):
         return {'name': self.name, 'level': self.level, 'message': self.message,
                 'cause': self.cause, 'timestamp': self.timestamp, 'original': self.original,
-                'type': self.type}
+                'type': self.type, 'id': self.create_uid()}
 
 
 class ResMetricObject(object):
@@ -39,11 +45,16 @@ class ResMetricObject(object):
         self.original = original  # the sponsor that cause this event/data, such as client visit...
         self.type = 'res'  # object type used by server
 
+    def create_uid(self):
+        tag = ''.join([self.name, str(self.timestamp)])
+        m = hashlib.md5(tag)
+        return m.hexdigest()
+
     # for serialization usage
     def to_dict(self):
         return {'name': self.name, 'value': self.value, 'resource': self.resource,
                 'timestamp': self.timestamp, 'original': self.original,
-                'type': self.type}
+                'type': self.type, 'id': self.create_uid()}
 
 
 class MetricObject(object):
@@ -55,10 +66,15 @@ class MetricObject(object):
         self.type = 'metric'
         self.timestamp = timestamp
 
+    def create_uid(self):
+        tag = ''.join([self.name, str(self.timestamp)])
+        m = hashlib.md5(tag)
+        return m.hexdigest()
+
     # for serialization usage
     def to_dict(self):
         return {'name': self.name, 'value': self.value, 'units': self.units,
-                'type': self.type, 'timestamp': self.timestamp}
+                'type': self.type, 'timestamp': self.timestamp, 'id': self.create_uid()}
 
 
 class LogsterParser(object):
