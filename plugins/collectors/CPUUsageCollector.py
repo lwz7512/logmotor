@@ -13,17 +13,13 @@ class CPUUsageCollector(object):
     2. simple implementation
     3. integrated as many as possible third part collectors
     """
-    def __init__(self, solo=True):
-        self.solo = solo  # if true, use this collector itself method
+    def __init__(self, host='localhost'):
+        self.host = host
 
     def collect(self):
         """
         use my own method or third part method to get the metric
         """
         print 'Collecting CPU metric...'
-        if self.solo:
-            pass  # TODO, IMPLEMENT A SIMPLE COLLECT METHOD
-        else:
-            pass  # TODO, CALL THE THIRD PART COLLECT COLLECTOR
 
         return None

@@ -90,7 +90,7 @@ def load_plugins(cfg):
     for key, value in vis_pfms:
         col_han = value.split(',')
         col_module = __import__('plugins.collectors.%s' % col_han[0], fromlist=[col_han[0]])
-        col_inst = getattr(col_module, col_han[0])()
+        col_inst = getattr(col_module, col_han[0])(host)
         han_module = __import__('plugins.handlers.%s' % col_han[1], fromlist=[col_han[1]])
         han_inst = getattr(han_module, col_han[1])(cfg)
 

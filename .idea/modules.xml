@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../liveloganalyzer/.idea/liveloganalyzer.iml" filepath="$PROJECT_DIR$/../liveloganalyzer/.idea/liveloganalyzer.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/logeye.iml" filepath="$PROJECT_DIR$/.idea/logeye.iml" />
       <module fileurl="file://$PROJECT_DIR$/../logster/.idea/logster.iml" filepath="$PROJECT_DIR$/../logster/.idea/logster.iml" />
       <module fileurl="file://$PROJECT_DIR$/../parsible/.idea/parsible.iml" filepath="$PROJECT_DIR$/../parsible/.idea/parsible.iml" />

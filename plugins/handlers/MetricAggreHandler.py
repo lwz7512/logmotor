@@ -9,7 +9,7 @@ class MetricAggreHandler(object):
 
     def __init__(self, cfg):
         """
-        save the server config..
+        send metric to carbon server,and display in graphite
         """
         self.carbon_server = cfg['carbon_ip']
         self.carbon_port = cfg['carbon_port']

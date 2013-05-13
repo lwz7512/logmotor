@@ -8,6 +8,7 @@
     <orderEntry type="module" module-name="parsible" />
     <orderEntry type="module" module-name="logster" />
     <orderEntry type="module" module-name="sample" />
+    <orderEntry type="module" module-name="liveloganalyzer" />
   </component>
 </module>
 
