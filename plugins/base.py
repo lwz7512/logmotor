@@ -16,7 +16,7 @@ class AlertMetricObject(object):
         self.cause = cause  # something that cause the problem
         self.timestamp = timestamp  # milliseconds when this event occurred
         self.original = original  # who invoke this problem
-        self.type = 'alert'  # object type used by server
+        self.type = 'alert'  # event type used by server
 
     def create_uid(self):
         tag = ''.join([self.name, str(self.timestamp)])
@@ -43,7 +43,7 @@ class ResMetricObject(object):
         self.resource = resource  # target or sub object to correspond the value created by service/host
         self.timestamp = timestamp  # milliseconds when the value created
         self.original = original  # the sponsor that cause this event/data, such as client visit...
-        self.type = 'res'  # object type used by server
+        self.type = 'res'  # event type used by server
 
     def create_uid(self):
         tag = ''.join([self.name, str(self.timestamp)])
@@ -63,8 +63,8 @@ class MetricObject(object):
         self.name = name
         self.value = value
         self.units = units
-        self.type = 'metric'
         self.timestamp = timestamp
+        self.type = 'pfm'  # event type used by server
 
     def create_uid(self):
         tag = ''.join([self.name, str(self.timestamp)])
