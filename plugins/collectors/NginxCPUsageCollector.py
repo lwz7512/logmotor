@@ -34,8 +34,7 @@ class NginxCPUsageCollector(object):
         print 'total cpu percent: %s' % total_cpu_percent
 
         results = []
-        metric = MetricObject('nginx.cputime.%s' % self.host,
-                              nginx_cpu_percent, '%')
+        metric = MetricObject('nginx.cputime.minute', nginx_cpu_percent, '%')
 
         return results.append(metric)
 
