@@ -1,8 +1,5 @@
 Logmotor --log visualization tool
 ==========================================
-
-2013/03/27
------------------
 This the start point of logmotor product:
 initial plan is to implement several common server log parsing and sending to django-socketio server by socketio-client, 
 then to implement dynamic log file parser...(possible?)
