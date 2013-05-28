@@ -25,9 +25,7 @@ class AlertMetricObject(object):
 
     # for serialization usage
     def to_dict(self):
-        return {'name': self.name, 'level': self.level, 'message': self.message,
-                'cause': self.cause, 'timestamp': self.timestamp, 'original': self.original,
-                'type': self.type, 'id': self.create_uid()}
+        return self.__dict__
 
 
 class ResMetricObject(object):
@@ -52,9 +50,7 @@ class ResMetricObject(object):
 
     # for serialization usage
     def to_dict(self):
-        return {'name': self.name, 'value': self.value, 'resource': self.resource,
-                'timestamp': self.timestamp, 'original': self.original,
-                'type': self.type, 'id': self.create_uid()}
+        return self.__dict__
 
 
 class MetricObject(object):
@@ -73,8 +69,7 @@ class MetricObject(object):
 
     # for serialization usage
     def to_dict(self):
-        return {'name': self.name, 'value': self.value, 'units': self.units,
-                'type': self.type, 'timestamp': self.timestamp, 'id': self.create_uid()}
+        return self.__dict__
 
 
 class LogsterParser(object):

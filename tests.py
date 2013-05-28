@@ -6,7 +6,7 @@ from anyjson import dumps
 
 from plugins.parsers.NginxAccessParser import NginxAccessParser
 from plugins.parsers.NginxErrorParser import NginxErrorParser
-from plugins.base import MetricObject
+from plugins.base import MetricObject, ResMetricObject
 
 
 class TestLineParsers(unittest.TestCase):
@@ -66,11 +66,18 @@ class TestJsonDump(unittest.TestCase):
         print dumps(mo.to_dict())
 
     def test_dict_in_list_serialize(self):
-        print '---------- TEST DIC IN LIST SERIALIZE ------'
+        print '---------- TEST DICT IN LIST SERIALIZE ------'
         mo = MetricObject('test.metric', 0, 'm')
         mt = MetricObject('two.metric', 1, 's')
         print dumps([mo.to_dict(), mt.to_dict()])
 
+    def test_dyna_append_attr(self):
+        print '---------- TEST DYNA APPEND ATTR ------------'
+        res = ResMetricObject('nginx.access', 0.1, '/', 123456)
+        setattr(res, 'server_name', 'localhost')
+        setattr(res, 'connection', 1)
+        print getattr(res, 'server_name'), getattr(res, 'connection')
+        print res.__dict__
 
 if __name__ == '__main__':
     # unittest.main()

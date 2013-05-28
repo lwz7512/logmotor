@@ -26,7 +26,7 @@ class NginxAccessParser(LogsterParser):
         log_format timed_combined '$remote_addr - $remote_user [$time_local] '
                                 '"$request" $status $body_bytes_sent '
                                 '"$http_referer" "$http_user_agent" '
-                                '$request_time $upstream_response_time $pipe';
+                                '$request_time $server_name $connection';
 
         *** CAUTION HERE:***
         In this parser, I used the log_format timed_combined borrowed from:
@@ -84,8 +84,8 @@ class NginxAccessParser(LogsterParser):
                                 (?P<status>\d{3})\s(?P<body_bytes_sent>\S*)\s\"(?P<http_referer>.+)\"\s
                                 \"(?P<http_user_agent>.+)\"\s
                                 (?P<request_time>\S*)\s
-                                (?P<upstream_response_time>\S*)\s
-                                (?P<pipe>\S*)""", re.X)
+                                (?P<server_name>\S*)\s
+                                (?P<connection>\S*)""", re.X)
         # save the metrics or non-metrics
         self.states = None
 
@@ -126,8 +126,9 @@ class NginxAccessParser(LogsterParser):
                 self.time_local = results.get('time_local', 'xxxxxx')[:-6]  # remove +0800
                 self.request_url = results.get('request_url', '')
                 self.request_time = results.get('request_time', '')
-                self.upstream_response_time = results.get('upstream_response_time', '')
                 self.user_agent = results.get('http_user_agent', '')
+                self.server_name = results.get('server_name', 'localhost')
+                self.connection = results.get('connection', '1')
 
                 return regMatch
             else:
@@ -164,5 +165,9 @@ class NginxAccessParser(LogsterParser):
                                      self.request_url,
                                      timestamp,
                                      self.remote_addr)
+        # FIXME, ADD SERVER, CONNECTION INFO...
+        # 2013/05/28
+        setattr(res_metric, 'server_name', self.server_name)
+        setattr(res_metric, 'connection', self.connection)
         # Return a list of metrics objects
         return res_metric
