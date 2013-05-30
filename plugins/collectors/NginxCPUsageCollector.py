@@ -35,6 +35,7 @@ class NginxCPUsageCollector(object):
 
         results = []
         metric = MetricObject('nginx.cputime.%s' % self.host, nginx_cpu_percent, '%')
+        setattr(metric, 'server_name', self.host)
 
         return results.append(metric)
 

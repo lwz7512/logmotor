@@ -12,12 +12,14 @@ def simple_dateformat_to_datetime(date_str):
     return datetime.fromtimestamp(time.mktime(time.strptime(date_str, "%Y-%m-%d %H:%M:%S")))
 
 
-# time_local: 18/Apr/2013:03:26:11
 def time_local_to_timestamp(string):
+    """
+    time_local: 18/Apr/2013:03:26:11
+    """
     return string_toTimestamp(string, '%d/%b/%Y:%H:%M:%S')
 
 
-def datetime_toString(dt):
+def datetime_toString(dt, format):
     return dt.strftime(format)
 
 

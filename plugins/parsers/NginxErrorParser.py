@@ -98,5 +98,5 @@ class NginxErrorParser(LogsterParser):
                                          self.request,
                                          string_toTimestamp(self.datetime, '%Y/%m/%d %H:%M:%S'),
                                          self.client)
-        # Return a list of metrics objects
+        setattr(error_metric, 'server_name', self.host)
         return error_metric
